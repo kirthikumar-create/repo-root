@@ -9,7 +9,7 @@ env:
   FASTAPI_REPO: lumen-uat-fastapi
   NGINX_REPO: lumen-uat-nginx
   CLUSTER: lumen-uat-cluster1
-  SERVICE: lumen-uat-service
+  SERVICE: lumen-uat-task-service-9mk5hllm
 
 jobs:
   deploy:

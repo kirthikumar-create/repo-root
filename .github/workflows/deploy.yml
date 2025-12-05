@@ -1,0 +1,50 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: ap-south-1
+  FASTAPI_REPO: lumen-uat-fastapi
+  NGINX_REPO: lumen-uat-nginx
+  CLUSTER: lumen-uat-cluster
+  SERVICE: lumen-uat-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and push FastAPI image
+      run: |
+        docker build -t $FASTAPI_REPO -f Dockerfile .
+        docker tag $FASTAPI_REPO:latest ${{ steps.login-ecr.outputs.registry }}/$FASTAPI_REPO:latest
+        docker push ${{ steps.login-ecr.outputs.registry }}/$FASTAPI_REPO:latest
+
+    - name: Build and push Nginx image
+      run: |
+        docker build -t $NGINX_REPO -f Dockerfile.nginx .
+        docker tag $NGINX_REPO:latest ${{ steps.login-ecr.outputs.registry }}/$NGINX_REPO:latest
+        docker push ${{ steps.login-ecr.outputs.registry }}/$NGINX_REPO:latest
+
+    - name: Update ECS Service
+      run: |
+        aws ecs update-service \
+          --cluster $CLUSTER \
+          --service $SERVICE \
+          --force-new-deployment

@@ -8,7 +8,7 @@ env:
   AWS_REGION: ap-south-1
   FASTAPI_REPO: lumen-uat-fastapi
   NGINX_REPO: lumen-uat-nginx
-  CLUSTER: lumen-uat-cluster
+  CLUSTER: lumen-uat-cluster1
   SERVICE: lumen-uat-service
 
 jobs:

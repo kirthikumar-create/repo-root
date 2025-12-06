@@ -1,7 +1,7 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 def job():
-    print(" scheduled job executed!")
+    print("Scheduled job executed!")
 
 async def start_scheduler():
     scheduler = AsyncIOScheduler()

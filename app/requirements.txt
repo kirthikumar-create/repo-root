@@ -1,4 +1,4 @@
 fastapi
 uvicorn[standard]
 APScheduler
-psycopg2-binary  # needed for RDS
+psycopg2-binary

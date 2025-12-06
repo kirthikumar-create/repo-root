@@ -2,8 +2,9 @@ name: Deploy to ECS
 
 on:
   push:
-    branches: [ "main" ]
-    
+    branches:
+      - main
+
 env:
   AWS_REGION: ap-south-1
   FASTAPI_REPO: lumen-uat-fastapi
@@ -22,7 +23,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -30,20 +31,20 @@ jobs:
 
     - name: Build and push FastAPI image
       run: |
-        docker build -t lumen-uat-fastapi -f Dockerfile .
-        docker tag lumen-uat-fastapi:latest ${{ steps.login-ecr.outputs.registry }}/lumen-uat-fastapi:latest
-        docker push ${{ steps.login-ecr.outputs.registry }}/lumen-uat-fastapi:latest
+        docker build -t $FASTAPI_REPO -f docker/Dockerfile.fastapi .
+        docker tag $FASTAPI_REPO:latest ${{ steps.login-ecr.outputs.registry }}/$FASTAPI_REPO:latest
+        docker push ${{ steps.login-ecr.outputs.registry }}/$FASTAPI_REPO:latest
 
     - name: Build and push Nginx image
       run: |
-        docker build -t lumen-uat-nginx -f Dockerfile.nginx .
-        docker tag lumen-uat-nginx:latest ${{ steps.login-ecr.outputs.registry }}/lumen-uat-nginx:latest
-        docker push ${{ steps.login-ecr.outputs.registry }}/lumen-uat-nginx:latest
+        docker build -t $NGINX_REPO -f docker/Dockerfile.nginx .
+        docker tag $NGINX_REPO:latest ${{ steps.login-ecr.outputs.registry }}/$NGINX_REPO:latest
+        docker push ${{ steps.login-ecr.outputs.registry }}/$NGINX_REPO:latest
 
-    - name: Update ECS Service
+    - name: Force new ECS deployment
       run: |
         aws ecs update-service \
-          --cluster lumen-uat-cluster1 \
-          --service lumen-uat-task-service-9mk5hllm \
-          --region ap-south-1 \
-          --force-new-deployment
+          --cluster cluster-1 \
+          --service lumen-uat-service \
+          --force-new-deployment \
+          --region $AWS_REGION

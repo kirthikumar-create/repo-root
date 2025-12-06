@@ -44,6 +44,6 @@ jobs:
       run: |
         aws ecs update-service \
           --cluster cluster-1 \
-          --service lumen-uat-service \
+          --service lumen-uat-service-8v5cxhdt \
           --force-new-deployment \
           --region ap-south-1
